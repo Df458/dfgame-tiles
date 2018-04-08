@@ -1,0 +1,13 @@
+tags
+obj
+lib/*.a
+
+*.un~
+
+build
+crossbuild
+
+subprojects/dfgame
+subprojects/glew-2.1.0
+subprojects/glfw
+subprojects/packagecache
