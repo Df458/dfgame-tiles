@@ -1,5 +1,5 @@
 shaders = [
-    glsl_gen.process('../../data/shaders/shader_tilemap.gl')
+    glsl_gen.process(join_paths(meson.current_source_dir(), '../data/shaders/shader_tilemap.gl'))
 ]
 
 tilesdeps = [ core, graphics, math, resource, xml ]
