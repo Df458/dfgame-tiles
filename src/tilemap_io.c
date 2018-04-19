@@ -5,6 +5,7 @@
 
 #include "check.h"
 #include "paths.h"
+#include "stringutil.h"
 #include "tileset_io.h"
 #include "log/log.h"
 
@@ -19,6 +20,8 @@ typedef struct tilemap {
 
     tileset set;
     tile* tile_data;
+
+    char* asset_path;
 }* tilemap;
 
 // Loads a tilemap from path, or returns NULL if an error occurs
@@ -47,6 +50,7 @@ tilemap load_tilemap(const char* path) {
     tileset_path = combine_paths(get_folder(path), tileset_path, true);
 
     tilemap map = tilemap_new(w, h, load_tileset(tileset_path));
+    map->asset_path = nstrdup(path);
 
     for(int i = 0; i < h; ++i) {
         for(int j = 0; j < w; ++j) {
@@ -62,15 +66,18 @@ tilemap load_tilemap(const char* path) {
 }
 
 // Saves a tilemap to path. tileset_file should point to the relative location for the map's tileset (this tileset file does not need to be present, and will not be accessed until the map is loaded).
-void save_tilemap(const char* path, tilemap map, const char* tileset_file) {
+void save_tilemap(const char* path, tilemap map) {
     FILE* outfile = fopen(path, "w");
 
     fwrite(&(map->width), sizeof(map->width), 1, outfile);
     fwrite(&(map->height), sizeof(map->height), 1, outfile);
 
-    ssize_t len = strlen(tileset_file);
+    char* t_path = get_relative_base(path, map->set.asset_path);
+    ssize_t len = strlen(map->set.asset_path) - strlen(t_path);
     fwrite(&(len), sizeof(len), 1, outfile);
-    fwrite((tileset_file), sizeof(char), len, outfile);
+
+    fwrite(map->set.asset_path + strlen(t_path), sizeof(char), len, outfile);
+    sfree(t_path);
 
     for(int i = 0; i < map->width * map->height; ++i)
         fwrite(map->tile_data, sizeof(tile), map->width * map->height, outfile);

@@ -50,7 +50,7 @@ void randomize(action_id id, void* user) {
 
 void save(action_id id, void* user) {
     char* p = assets_path(TILEMAP_NAME, NULL);
-    save_tilemap(p, map, TILESET_NAME);
+    save_tilemap(p, map);
     sfree(p);
 }
 
@@ -111,6 +111,10 @@ int main(int argc, char** argv) {
     map = tilemap_new(MAP_DIM, MAP_DIM, load_tileset(assets_path(TILESET_NAME, NULL)));
 
     mainloop_create_run(loop_fn);
+
+    tilemap_free(map, true);
+    resource_path_free();
+    window_free(win);
 
     return 0;
 }

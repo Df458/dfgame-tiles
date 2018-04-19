@@ -12,6 +12,8 @@ typedef struct tileset {
 
     uint16 width;
     uint16 height;
+
+    char* asset_path;
 } tileset;
 
 // Returns the uv bounding box for the given tile index
@@ -19,5 +21,8 @@ aabb_2d tileset_get_tile(tileset set, uint16 tile);
 
 // Calculates the dimensions of a tile, in pixels
 vec2 tileset_get_tile_dims(tileset set);
+
+// Frees up the dnamic contents of a tieset
+void tileset_cleanup(tileset* set);
 
 #endif

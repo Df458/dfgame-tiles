@@ -83,11 +83,15 @@ tileset load_tileset(const char* path) {
         return (tileset){0};
     }
 
+    set.asset_path = nstrdup(path);
+
+    xmlFreeDoc(doc);
+
     return set;
 }
 
 // Saves a tileset to path. texture_file should point to the relative location for the set's texture (this image file does not need to be present, and will not be accessed until the map is loaded)
-void save_tileset(const char* path, tileset set, const char* texture_file) {
+void save_tileset(const char* path, tileset set) {
     xmlTextWriter* writer = xmlNewTextWriterFilename(path, 0);
     check_return(writer, "Failed to open path %s for writing", , path);
 
@@ -119,7 +123,9 @@ void save_tileset(const char* path, tileset set, const char* texture_file) {
     xmlTextWriterWriteAttribute(writer, (xmlChar*)"tile_height", (xmlChar*)a);
     sfree(a);
 
-    xmlTextWriterWriteAttribute(writer, (xmlChar*)"file", (xmlChar*)texture_file);
+    char* t_path = get_relative_base(path, set.tex.asset_path);
+    xmlTextWriterWriteAttribute(writer, (xmlChar*)"file", (xmlChar*)(set.tex.asset_path + strlen(t_path)));
+    sfree(t_path);
 
     xmlTextWriterEndElement(writer);
     xmlTextWriterEndDocument(writer);

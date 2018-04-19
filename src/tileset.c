@@ -21,3 +21,11 @@ aabb_2d tileset_get_tile(tileset set, uint16 tile) {
 vec2 tileset_get_tile_dims(tileset set) {
     return (vec2) { .x = set.tile_box.dimensions.x * set.tex.width, .y = set.tile_box.dimensions.y * set.tex.height };
 }
+
+void tileset_cleanup(tileset* set) {
+    check_return(set, "Can't cleanup tileset, because it's NULL", );
+
+    gltex_cleanup(&set->tex);
+    if(set->asset_path)
+        sfree(set->asset_path);
+}

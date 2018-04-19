@@ -20,6 +20,8 @@ typedef struct tilemap {
 
     tileset set;
     tile* tile_data;
+
+    char* asset_path;
 }* tilemap;
 
 // Rebuilds the tile data buffer for map
@@ -46,7 +48,7 @@ void tilemap_rebuild_mesh(tilemap map) {
             mesh_data[i * map->width + j].position = (vec3){.x = j, .y = i, .z = 0};
         }
     }
-    map->m = mesh_new(map->width * map->height, mesh_data);
+    map->m = mesh_new(map->width * map->height, mesh_data, NULL);
 
     tilemap_update_tiles(map);
 }
@@ -61,6 +63,7 @@ tilemap tilemap_new(uint16 w, uint16 h, tileset set) {
     map->height = h;
     map->tile_data = mscalloc(w * h, tile);
     map->set = set;
+    map->asset_path = NULL;
 
     glGenBuffers(1, &map->tile_handle);
     tilemap_rebuild_mesh(map);
@@ -73,11 +76,13 @@ void _tilemap_free(tilemap map, bool deep) {
     sfree(map->tile_data);
 
     if(deep)
-        glDeleteTextures(1, &map->set.tex.handle);
+        tileset_cleanup(&map->set);
 
     glDeleteBuffers(1, &map->tile_handle);
 
     mesh_free(map->m);
+    if(map->asset_path)
+        sfree(map->asset_path);
     sfree(map);
 }
 

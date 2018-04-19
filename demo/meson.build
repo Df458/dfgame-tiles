@@ -14,4 +14,4 @@ demo_target = executable('demo_tiles',
         link_args : args,
         install : false)
 run_command('ctags', '-R', '.')
-run_command('ln', '-rs', 'assets', '../../build/demo')
+run_command('ln', '-rs', 'assets', '../build/demo')
