@@ -12,7 +12,7 @@ aabb_2d tileset_get_tile(tileset set, uint16 tile) {
     aabb_2d box = { .position = set.offset, .dimensions = set.tile_box.dimensions };
 
     box.position.x += (tile % set.width) * (set.tile_box.dimensions.x + set.tile_box.position.x) - set.tile_box.position.x;
-    box.position.y += (tile / set.height) * (set.tile_box.dimensions.y + set.tile_box.position.y) - set.tile_box.position.y;
+    box.position.y += (tile / set.width) * (set.tile_box.dimensions.y + set.tile_box.position.y) - set.tile_box.position.y;
 
     return box;
 }
