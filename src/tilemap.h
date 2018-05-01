@@ -39,6 +39,9 @@ uint16 tilemap_get_width(tilemap map);
 // Returns the height of map
 uint16 tilemap_get_height(tilemap map);
 
+// Resizes map, leaving the previous contents in the top-left corner
+void tilemap_resize(tilemap map, uint16 w, uint16 h);
+
 // Returns the default shader for rendering tilemaps. This will compile the shader if it hasn't been done already.
 shader get_tilemap_shader();
 

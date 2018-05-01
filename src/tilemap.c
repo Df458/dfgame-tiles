@@ -130,6 +130,27 @@ uint16 tilemap_get_height(tilemap map) {
     return map->height;
 }
 
+// Resizes map, leaving the previous contents in the top-left corner
+void tilemap_resize(tilemap map, uint16 w, uint16 h) {
+    check_return(w * h != 0, "Trying to resize a map to invalid dimensions [%dx%d]", , w, h);
+    tile* new_data = mscalloc(w * h, tile);
+
+    // Copy the data from the old array to the new one. Note that
+    // bounds-checking must be performed on *both* buffers, since either one
+    // could be smaller.
+    for(int i = 0; i < map->height && i < h; ++i) {
+        for(int j = 0; j < map->width && j < w; ++j) {
+            new_data[i * w + j] = map->tile_data[i * map->width + j];
+        }
+    }
+
+    sfree(map->tile_data);
+    map->tile_data = new_data;
+    map->width = w;
+    map->height = h;
+    tilemap_rebuild_mesh(map);
+}
+
 // Returns the default shader for rendering tilemaps. This will compile the shader if it hasn't been done already.
 shader get_tilemap_shader() {
     if(shader_tilemap.id == 0)
