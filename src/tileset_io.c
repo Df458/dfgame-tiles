@@ -93,16 +93,16 @@ tileset load_tileset(const char* path) {
         if(node->type == XML_ELEMENT_NODE && !xmlStrcmp(node->name, (const xmlChar*)"tile")) {
             int16 x = -1;
             int16 y = -1;
-            if((a = xmlGetProp(root, (const xmlChar*)"x"))) {
+            if((a = xmlGetProp(node, (const xmlChar*)"x"))) {
                 x = atoi((char*)a);
                 sfree(a);
             }
-            if((a = xmlGetProp(root, (const xmlChar*)"y"))) {
+            if((a = xmlGetProp(node, (const xmlChar*)"y"))) {
                 y = atoi((char*)a);
                 sfree(a);
             }
 
-            if(x > -1 && y > -1 && (a = xmlGetProp(root, (const xmlChar*)"mask"))) {
+            if(x > -1 && y > -1 && (a = xmlGetProp(node, (const xmlChar*)"mask"))) {
                 set.tile_mask[y * set.width + x] = atoi((char*)a);
                 sfree(a);
             }
