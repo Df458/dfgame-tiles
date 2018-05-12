@@ -27,7 +27,7 @@ typedef struct tilemap {
 // Loads a tilemap from path, or returns NULL if an error occurs
 tilemap load_tilemap(const char* path) {
     uint16 w, h;
-    tile t;
+    uint16 t;
     ssize_t plen;
     char* tileset_path;
 
@@ -54,7 +54,7 @@ tilemap load_tilemap(const char* path) {
 
     for(int i = 0; i < h; ++i) {
         for(int j = 0; j < w; ++j) {
-            if(check_warn(fread(&(t.id), sizeof(uint16), 1, infile) == 1, "Unexpected end of file while reading tile data. Tilemap may be incomplete."))
+            if(check_warn(fread(&t, sizeof(uint16), 1, infile) == 1, "Unexpected end of file while reading tile data. Tilemap may be incomplete."))
                 break;
             tilemap_set_tile(map, j, i, t);
         }

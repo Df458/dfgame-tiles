@@ -45,7 +45,7 @@ void randomize(action_id id, void* user) {
     // Fill every map space with random tile indices, calculated from the
     // tileset dimensions.
     for(int i = 0; i < w * h; ++i)
-        tilemap_set_tile(map, i % w, i / w, (tile){ .id=rand() % (set.width * set.height) });
+        tilemap_set_tile(map, i % w, i / w, rand() % (set.width * set.height));
 }
 
 void save(action_id id, void* user) {

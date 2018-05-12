@@ -35,6 +35,10 @@ tileset load_tileset(const char* path) {
         sfree(a);
     }
 
+    if(set.width * set.height > 0) {
+        set.tile_mask = mscalloc(set.width * set.height, uint8);
+    }
+
     if((a = xmlGetProp(root, (const xmlChar*)"file"))) {
         char* full_path = combine_paths(get_folder(path), (char*)a, true);
         set.tex = load_texture_gl(full_path);
@@ -80,8 +84,29 @@ tileset load_tileset(const char* path) {
 
     if(check_error(set.offset.x - set.tile_box.position.x + (set.tile_box.dimensions.x + set.tile_box.position.x) * set.width <= 1 || set.offset.y - set.tile_box.position.y + (set.tile_box.dimensions.y + set.tile_box.position.y) * set.height <= 1, "Dimensions of tileset %s are larger than the texture it uses", path)) {
         glDeleteTextures(1, &set.tex.handle);
+        if(set.tile_mask)
+            sfree(set.tile_mask);
         return (tileset){0};
     }
+
+    for(xmlNodePtr node = root->children; node; node = node->next)
+        if(node->type == XML_ELEMENT_NODE && !xmlStrcmp(node->name, (const xmlChar*)"tile")) {
+            int16 x = -1;
+            int16 y = -1;
+            if((a = xmlGetProp(root, (const xmlChar*)"x"))) {
+                x = atoi((char*)a);
+                sfree(a);
+            }
+            if((a = xmlGetProp(root, (const xmlChar*)"y"))) {
+                y = atoi((char*)a);
+                sfree(a);
+            }
+
+            if(x > -1 && y > -1 && (a = xmlGetProp(root, (const xmlChar*)"mask"))) {
+                set.tile_mask[y * set.width + x] = atoi((char*)a);
+                sfree(a);
+            }
+        }
 
     set.asset_path = nstrdup(path);
 
@@ -126,6 +151,27 @@ void save_tileset(const char* path, tileset set) {
     char* t_path = get_relative_base(path, set.tex.asset_path);
     xmlTextWriterWriteAttribute(writer, (xmlChar*)"file", (xmlChar*)(set.tex.asset_path + strlen(t_path)));
     sfree(t_path);
+
+
+    if(set.tile_mask) {
+        for(uint16 i = 0; i < set.height; ++i) {
+            for(uint16 j = 0; j < set.width; ++j) {
+                if(set.tile_mask[i * set.width + j]) {
+                    xmlTextWriterStartElement(writer, (xmlChar*)"tile");
+                    a = saprintf("%d", j);
+                    xmlTextWriterWriteAttribute(writer, (xmlChar*)"x", (xmlChar*)a);
+                    sfree(a);
+                    a = saprintf("%d", i);
+                    xmlTextWriterWriteAttribute(writer, (xmlChar*)"y", (xmlChar*)a);
+                    sfree(a);
+                    a = saprintf("%d", set.tile_mask[i * set.width + j]);
+                    xmlTextWriterWriteAttribute(writer, (xmlChar*)"mask", (xmlChar*)a);
+                    sfree(a);
+                    xmlTextWriterEndElement(writer);
+                }
+            }
+        }
+    }
 
     xmlTextWriterEndElement(writer);
     xmlTextWriterEndDocument(writer);

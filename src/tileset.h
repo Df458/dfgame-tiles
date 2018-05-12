@@ -14,6 +14,8 @@ typedef struct tileset {
     uint16 height;
 
     char* asset_path;
+
+    uint8* tile_mask;
 } tileset;
 
 // Returns the uv bounding box for the given tile index

@@ -28,4 +28,6 @@ void tileset_cleanup(tileset* set) {
     gltex_cleanup(&set->tex);
     if(set->asset_path)
         sfree(set->asset_path);
+    if(set->tile_mask)
+        sfree(set->tile_mask);
 }

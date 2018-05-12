@@ -9,6 +9,7 @@
 declarep(struct, tilemap)
 typedef struct tile {
     uint16 id;
+    uint8 mask;
 } tile;
 
 // Creates a new empty tilemap
@@ -22,7 +23,7 @@ void _tilemap_free(tilemap map, bool deep);
 void tilemap_set_tileset(tilemap map, tileset set);
 
 // Sets the tile at [x, y]
-void tilemap_set_tile(tilemap map, uint16 x, uint16 y, tile t);
+void tilemap_set_tile(tilemap map, uint16 x, uint16 y, uint16 id);
 
 // Returns the tile value at [x, y]. Defaults to 0 and logs a warning if [x,y] is out-of-bounds.
 tile tilemap_get_tile(tilemap map, uint16 x, uint16 y);
