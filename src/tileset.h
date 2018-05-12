@@ -21,8 +21,11 @@ typedef struct tileset {
 // Returns the uv bounding box for the given tile index
 aabb_2d tileset_get_tile(tileset set, uint16 tile);
 
-// Returns the bitmask for he given tile index
+// Returns the bitmask for the given tile index
 uint8 tileset_get_mask(tileset set, uint16 tile);
+
+// Sets the bitmask for the given tile index
+void tileset_set_mask(tileset set, uint16 tile, uint8 mask);
 
 // Calculates the dimensions of a tile, in pixels
 vec2 tileset_get_tile_dims(tileset set);

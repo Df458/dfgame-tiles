@@ -25,6 +25,13 @@ uint8 tileset_get_mask(tileset set, uint16 tile) {
     return set.tile_mask[tile];
 }
 
+void tileset_set_mask(tileset set, uint16 tile, uint8 mask) {
+    check_return(tile < set.width * set.height, "Requested tile index %d is out of bounds. (Tileset length is %d)", );
+    check_return(set.tile_mask, "Can't set tile mask, tileset has no mask.", );
+
+    set.tile_mask[tile] = mask;
+}
+
 // Calculates the dimensions of a tile, in pixels
 vec2 tileset_get_tile_dims(tileset set) {
     return (vec2) { .x = set.tile_box.dimensions.x * set.tex.width, .y = set.tile_box.dimensions.y * set.tex.height };
