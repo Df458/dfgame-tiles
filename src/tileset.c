@@ -17,6 +17,14 @@ aabb_2d tileset_get_tile(tileset set, uint16 tile) {
     return box;
 }
 
+uint8 tileset_get_mask(tileset set, uint16 tile) {
+    check_return(tile < set.width * set.height, "Requested tile index %d is out of bounds. (Tileset length is %d)", 0, tile, set.width * set.height);
+    if(!set.tile_mask)
+        return 0;
+
+    return set.tile_mask[tile];
+}
+
 // Calculates the dimensions of a tile, in pixels
 vec2 tileset_get_tile_dims(tileset set) {
     return (vec2) { .x = set.tile_box.dimensions.x * set.tex.width, .y = set.tile_box.dimensions.y * set.tex.height };
