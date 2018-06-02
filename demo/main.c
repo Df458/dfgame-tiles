@@ -18,7 +18,7 @@
 #include <time.h>
 #include <stdlib.h>
 
-static void* win = NULL;
+static window win = NULL;
 
 static tilemap map = NULL;
 static camera c_main = NULL;
@@ -80,12 +80,12 @@ bool loop_fn(mainloop l, float dt) {
     text_draw(info_text, s_text, mat4_mul(camera_get_vp(c_main), mat4_translate(mat4_ident, offset)));
 
     window_redraw(win);
-    return !window_should_close(win);
+    return !window_get_should_close(win);
 }
 
 int main(int argc, char** argv) {
     // Init window/paths/shaders
-    win = window_new_default(1280, 720, "Tiles Demo");
+    win = window_new(1280, 720, false, "Tiles Demo");
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     init_base_resource_path(NULL);
