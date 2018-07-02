@@ -99,7 +99,7 @@ void tilemap_set_tileset(tilemap map, tileset set) {
 void tilemap_set_tile(tilemap map, uint16 x, uint16 y, uint16 id) {
     check_return(x < map->width && y < map->height, "Can't set out-of-bounds tile at [%d, %d] from a %dx%d map", , x, y, map->width, map->height);
 
-    map->tile_data[y * map->width + x] = (tile){ .id = id, .mask = map->set.tile_mask[id] };
+    map->tile_data[y * map->width + x] = (tile){ .id = id, .mask = tileset_get_mask(map->set, id) };
 
     tilemap_update_tiles(map);
 }

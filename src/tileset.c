@@ -13,6 +13,7 @@ aabb_2d tileset_get_tile(tileset set, uint16 tile) {
 
     box.position.x += (tile % set.width) * (set.tile_box.dimensions.x + set.tile_box.position.x) - set.tile_box.position.x;
     box.position.y += (tile / set.width) * (set.tile_box.dimensions.y + set.tile_box.position.y) - set.tile_box.position.y;
+    box.dimensions.y -= 0.1 / (float)set.tex.height;
 
     return box;
 }
@@ -25,11 +26,14 @@ uint8 tileset_get_mask(tileset set, uint16 tile) {
     return set.tile_mask[tile];
 }
 
-void tileset_set_mask(tileset set, uint16 tile, uint8 mask) {
-    check_return(tile < set.width * set.height, "Requested tile index %d is out of bounds. (Tileset length is %d)", );
-    check_return(set.tile_mask, "Can't set tile mask, tileset has no mask.", );
+void tileset_set_mask(tileset* set, uint16 tile, uint8 mask) {
+    check_return(tile < set->width * set->height, "Requested tile index %d is out of bounds. (Tileset length is %d)", );
 
-    set.tile_mask[tile] = mask;
+    if(!set->tile_mask) {
+        set->tile_mask = mscalloc(set->width * set->height, uint8);
+    }
+
+    set->tile_mask[tile] = mask;
 }
 
 // Calculates the dimensions of a tile, in pixels
