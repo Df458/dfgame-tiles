@@ -20,8 +20,9 @@ aabb_2d tileset_get_tile(tileset set, uint16 tile) {
 
 uint8 tileset_get_mask(tileset set, uint16 tile) {
     check_return(tile < set.width * set.height, "Requested tile index %d is out of bounds. (Tileset length is %d)", 0, tile, set.width * set.height);
-    if(!set.tile_mask)
+    if(!set.tile_mask) {
         return 0;
+    }
 
     return set.tile_mask[tile];
 }

@@ -52,8 +52,9 @@ tileset load_tileset(const char* path) {
     int16 y = -1;
     uint8 mask = -1;
     for(xmlNodePtr node = xml_match_name(root->children, "tile"); node; node = xml_match_name(node->next, "tile")) {
-        if(xml_property_read(node, "x", &x) && xml_property_read(node, "y", &y) && xml_property_read(node, "mask", &mask))
+        if(xml_property_read(node, "x", &x) && xml_property_read(node, "y", &y) && xml_property_read(node, "mask", &mask)) {
             tileset_set_mask(&set, y * set.width + x, mask);
+        }
     }
 
     set.asset_path = nstrdup(path);

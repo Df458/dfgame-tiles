@@ -3,11 +3,11 @@
 
 #include "tilemap_io.h"
 
-#include "check.h"
-#include "paths.h"
-#include "stringutil.h"
+#include "core/check.h"
+#include "core/log/log.h"
+#include "core/stringutil.h"
+#include "resource/paths.h"
 #include "tileset_io.h"
-#include "log/log.h"
 
 #include <stdio.h>
 
@@ -54,8 +54,9 @@ tilemap load_tilemap(const char* path) {
 
     for(int i = 0; i < h; ++i) {
         for(int j = 0; j < w; ++j) {
-            if(check_warn(fread(&t, sizeof(tile), 1, infile) == 1, "Unexpected end of file while reading tile data. Tilemap may be incomplete."))
+            if(check_warn(fread(&t, sizeof(tile), 1, infile) == 1, "Unexpected end of file while reading tile data. Tilemap may be incomplete.")) {
                 break;
+            }
             tilemap_set_tile(map, j, i, t.id);
         }
     }
@@ -79,8 +80,9 @@ void save_tilemap(const char* path, tilemap map) {
     fwrite(map->set.asset_path + strlen(t_path), sizeof(char), len, outfile);
     sfree(t_path);
 
-    for(int i = 0; i < map->width * map->height; ++i)
+    for(int i = 0; i < map->width * map->height; ++i) {
         fwrite(map->tile_data, sizeof(tile), map->width * map->height, outfile);
+    }
 
     fclose(outfile);
 }

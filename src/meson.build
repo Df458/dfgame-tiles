@@ -30,3 +30,13 @@ install_headers(
     subdir : 'dfgame/tiles')
 
 tiles = declare_dependency(include_directories : include_directories('.'), link_with : tileslib)
+
+if tidy.found()
+    run_target(
+        'tidy-tiles',
+        command: [
+            tidy,
+            '-checks=*',
+            '-p', meson.build_root()
+        ] + tilessrc)
+endif

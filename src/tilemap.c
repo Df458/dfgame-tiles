@@ -5,9 +5,8 @@
 
 #include "shader_tilemap.h"
 
-#include "check.h"
-#include "container/array.h"
-#include "matrix.h"
+#include "core/check.h"
+#include "math/matrix.h"
 
 static shader shader_tilemap = {0};
 
@@ -26,6 +25,8 @@ typedef struct tilemap {
 
 // Rebuilds the tile data buffer for map
 void tilemap_update_tiles(tilemap map) {
+    check_return(map->width * map->height != 0, "Tilemap is invalid", );
+
     aabb_2d tiles[map->width * map->height];
     for(int i = 0; i < map->height; ++i) {
         for(int j = 0; j < map->width; ++j) {
@@ -75,14 +76,16 @@ tilemap tilemap_new(uint16 w, uint16 h, tileset set) {
 void _tilemap_free(tilemap map, bool deep) {
     sfree(map->tile_data);
 
-    if(deep)
+    if(deep) {
         tileset_cleanup(&map->set);
+    }
 
     glDeleteBuffers(1, &map->tile_handle);
 
     mesh_free(map->m);
-    if(map->asset_path)
+    if(map->asset_path) {
         sfree(map->asset_path);
+    }
     sfree(map);
 }
 
@@ -153,8 +156,9 @@ void tilemap_resize(tilemap map, uint16 w, uint16 h) {
 
 // Returns the default shader for rendering tilemaps. This will compile the shader if it hasn't been done already.
 shader get_tilemap_shader() {
-    if(shader_tilemap.id == 0)
+    if(shader_tilemap.id == 0) {
         shader_tilemap = compile_shader_tilemap();
+    }
 
     return shader_tilemap;
 }
