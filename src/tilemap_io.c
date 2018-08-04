@@ -57,9 +57,11 @@ tilemap load_tilemap(const char* path) {
             if(check_warn(fread(&t, sizeof(tile), 1, infile) == 1, "Unexpected end of file while reading tile data. Tilemap may be incomplete.")) {
                 break;
             }
-            tilemap_set_tile(map, j, i, t.id);
+            tilemap_set_tile_fast(map, j, i, t.id);
         }
     }
+
+    tilemap_update_tiles(map);
 
     fclose(infile);
 

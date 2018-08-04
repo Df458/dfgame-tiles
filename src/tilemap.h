@@ -25,6 +25,12 @@ void tilemap_set_tileset(tilemap map, tileset set);
 // Sets the tile at [x, y]
 void tilemap_set_tile(tilemap map, uint16 x, uint16 y, uint16 id);
 
+// Sets the tile at [x, y], but doesn't update the mesh data
+void tilemap_set_tile_fast(tilemap map, uint16 x, uint16 y, uint16 id);
+
+// Regenerates the tilmap's mesh
+void tilemap_update_tiles(tilemap map);
+
 // Returns the tile value at [x, y]. Defaults to 0 and logs a warning if [x,y] is out-of-bounds.
 tile tilemap_get_tile(tilemap map, uint16 x, uint16 y);
 
