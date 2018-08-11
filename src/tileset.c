@@ -18,6 +18,7 @@ aabb_2d tileset_get_tile(tileset set, uint16 tile) {
     return box;
 }
 
+// Returns the bitmask for the given tile index
 uint8 tileset_get_mask(tileset set, uint16 tile) {
     check_return(tile < set.width * set.height, "Requested tile index %d is out of bounds. (Tileset length is %d)", 0, tile, set.width * set.height);
     if(!set.tile_mask) {
@@ -27,6 +28,7 @@ uint8 tileset_get_mask(tileset set, uint16 tile) {
     return set.tile_mask[tile];
 }
 
+// Sets the bitmask for the given tile index
 void tileset_set_mask(tileset* set, uint16 tile, uint8 mask) {
     check_return(tile < set->width * set->height, "Requested tile index %d is out of bounds. (Tileset length is %d)", );
 
@@ -35,6 +37,33 @@ void tileset_set_mask(tileset* set, uint16 tile, uint8 mask) {
     }
 
     set->tile_mask[tile] = mask;
+}
+
+// Sets the dimensions (in tiles) of the tileset, and updates the mask accordingly
+void tileset_resize(tileset* set, uint16 width, uint16 height) {
+    uint16 old_width = set->width;
+    uint16 old_height = set->height;
+    uint8* old_mask = set->tile_mask;
+
+    set->width = width;
+    set->height = height;
+
+    if(old_mask) {
+        if(width * height > 0) {
+            set->tile_mask = mscalloc(set->width * set->height, uint8);
+            for(uint16 i = 0; i < set->height && i < old_height; ++i) {
+                for(uint16 j = 0; j < set->width && j < old_width; ++j) {
+                    if(old_mask[i * old_width + j] != 0) {
+                        set->tile_mask[i * set->width + j] = old_mask[i * old_width + j];
+                    }
+                }
+            }
+        } else {
+            set->tile_mask = NULL;
+        }
+
+        sfree(old_mask);
+    }
 }
 
 // Calculates the dimensions of a tile, in pixels

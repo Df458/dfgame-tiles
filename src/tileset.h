@@ -27,6 +27,9 @@ uint8 tileset_get_mask(tileset set, uint16 tile);
 // Sets the bitmask for the given tile index
 void tileset_set_mask(tileset* set, uint16 tile, uint8 mask);
 
+// Sets the dimensions (in tiles) of the tileset, and updates the mask accordingly
+void tileset_resize(tileset* set, uint16 width, uint16 height);
+
 // Calculates the dimensions of a tile, in pixels
 vec2 tileset_get_tile_dims(tileset set);
 
