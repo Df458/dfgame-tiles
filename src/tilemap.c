@@ -20,42 +20,63 @@ typedef struct tilemap {
     tileset set;
     tile* tile_data;
 
+    bool is_empty;
+    bool tiles_dirty;
+    bool mesh_dirty;
+
     char* asset_path;
 }* tilemap;
 
 // Rebuilds the tile data buffer for map
 void tilemap_update_tiles(tilemap map) {
+    map->tiles_dirty = false;
+
     check_return(map->width * map->height != 0, "Tilemap is invalid", );
 
     aabb_2d tiles[map->width * map->height];
+    uint16 index = 0;
     for(int i = 0; i < map->height; ++i) {
         for(int j = 0; j < map->width; ++j) {
-            tiles[i * map->width + j] = tileset_get_tile(map->set, map->tile_data[i * map->width + j].id);
+            if(map->tile_data[i * map->width + j].id != NO_TILE) {
+                tiles[index] = tileset_get_tile(map->set, map->tile_data[i * map->width + j].id);
+                ++index;
+            }
         }
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, map->tile_handle);
-    glBufferData(GL_ARRAY_BUFFER, map->width * map->height * sizeof(aabb_2d), tiles, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, index * sizeof(aabb_2d), tiles, GL_DYNAMIC_DRAW);
 }
 
 // Rebuilds the mesh data for map
 void tilemap_rebuild_mesh(tilemap map) {
+    map->mesh_dirty = false;
+
     if(map->m)
         mesh_free(map->m);
 
     vt_p mesh_data[map->width * map->height];
+    uint16 index = 0;
     for(int i = 0; i < map->height; ++i) {
         for(int j = 0; j < map->width; ++j) {
-            mesh_data[i * map->width + j].position = (vec3){.x = j, .y = i, .z = 0};
+            if(map->tile_data[i * map->width + j].id != NO_TILE) {
+                mesh_data[index].position = (vec3){.x = j, .y = i, .z = 0};
+                ++index;
+            }
         }
     }
-    map->m = mesh_new(map->width * map->height, mesh_data, NULL);
 
-    tilemap_update_tiles(map);
+    if(index == 0) {
+        map->is_empty = true;
+    } else {
+        map->is_empty = false;
+        map->m = mesh_new(index, mesh_data, NULL);
+        tilemap_update_tiles(map);
+    }
 }
 
 // Creates a new empty tilemap
-tilemap tilemap_new(uint16 w, uint16 h, tileset set) {
+tilemap tilemap_new(uint16 w, uint16 h) {
     check_return(w * h != 0, "Trying to create a tilemap with the invalid dimensions [%dx%d]", NULL, w, h);
 
     tilemap map = mscalloc(1, struct tilemap);
@@ -63,11 +84,15 @@ tilemap tilemap_new(uint16 w, uint16 h, tileset set) {
     map->width = w;
     map->height = h;
     map->tile_data = mscalloc(w * h, tile);
-    map->set = set;
+    for(uint16 i = 0; i < w * h; ++i) {
+        map->tile_data[i] = (tile){ .id=NO_TILE, .mask=0 };
+    }
     map->asset_path = NULL;
+    map->is_empty = true;
+    map->tiles_dirty = false;
+    map->mesh_dirty = false;
 
     glGenBuffers(1, &map->tile_handle);
-    tilemap_rebuild_mesh(map);
 
     return map;
 }
@@ -100,14 +125,18 @@ void tilemap_set_tileset(tilemap map, tileset set) {
 
 // Sets the tile at [x, y]
 void tilemap_set_tile(tilemap map, uint16 x, uint16 y, uint16 id) {
-    tilemap_set_tile_fast(map, x, y, id);
-
-    tilemap_update_tiles(map);
-}
-
-// Sets the tile at [x, y]
-void tilemap_set_tile_fast(tilemap map, uint16 x, uint16 y, uint16 id) {
     check_return(x < map->width && y < map->height, "Can't set out-of-bounds tile at [%d, %d] from a %dx%d map", , x, y, map->width, map->height);
+    check_return(id < map->set.width * map->set.height, "Can't set tile id %d, active tileset has %d entries", , id, map->set.width * map->set.height);
+
+    // Set dirty flags
+    if(map->tile_data[y * map->width + x].id != id) {
+        map->tiles_dirty = true;
+
+        // If we're removing a tile or placing one where it didn't exist before, the mesh will need rebuilding
+        if((map->tile_data[y * map->width + x].id == NO_TILE || id == NO_TILE)) {
+            map->mesh_dirty = true;
+        }
+    }
 
     map->tile_data[y * map->width + x] = (tile){ .id = id, .mask = tileset_get_mask(map->set, id) };
 }
@@ -120,6 +149,13 @@ tile tilemap_get_tile(tilemap map, uint16 x, uint16 y) {
 
 // Returns the mesh data for map
 mesh tilemap_get_mesh(tilemap map) {
+    // Regenerate data if necessary
+    if(map->mesh_dirty) {
+        tilemap_rebuild_mesh(map);
+    } else if(map->tiles_dirty) {
+        tilemap_update_tiles(map);
+    }
+
     return map->m;
 }
 
@@ -170,6 +206,17 @@ shader get_tilemap_shader() {
 
 // Draws the tilemap with the given shader and transformation matrices
 void tilemap_draw(tilemap map, shader s, mat4 model, mat4 view) {
+    // Regenerate data if necessary
+    if(map->mesh_dirty) {
+        tilemap_rebuild_mesh(map);
+    } else if(map->tiles_dirty) {
+        tilemap_update_tiles(map);
+    }
+
+    if(map->is_empty) {
+        return;
+    }
+
     glUseProgram(s.id);
     shader_bind_uniform_name(s, "u_transform", model);
     shader_bind_uniform_name(s, "u_view", view);

@@ -4,6 +4,8 @@
 #include "texture.h"
 #include "types.h"
 
+#define NO_TILE UINT16_MAX
+
 typedef struct tileset {
     gltex tex;
 
@@ -17,6 +19,8 @@ typedef struct tileset {
 
     uint8* tile_mask;
 } tileset;
+
+const extern tileset tileset_empty;
 
 // Returns the uv bounding box for the given tile index
 aabb_2d tileset_get_tile(tileset set, uint16 tile);

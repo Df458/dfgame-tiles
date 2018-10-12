@@ -5,14 +5,18 @@
 
 #include "check.h"
 
+const tileset tileset_empty = {{0}};
+
 // Returns the uv bounding box for the given tile index
 aabb_2d tileset_get_tile(tileset set, uint16 tile) {
-    check_return(tile < set.width * set.height, "Requested tile index %d is out of bounds. (Tileset length is %d)", (aabb_2d){0}, tile, set.width * set.height);
+    check_return(tile < set.width * set.height, "Requested tile index %d is out of bounds. (Tileset length is %d)", aabb_2d_zero, tile, set.width * set.height);
 
     aabb_2d box = { .position = set.offset, .dimensions = set.tile_box.dimensions };
 
-    box.position.x += (tile % set.width) * (set.tile_box.dimensions.x + set.tile_box.position.x) - set.tile_box.position.x;
-    box.position.y += (tile / set.width) * (set.tile_box.dimensions.y + set.tile_box.position.y) - set.tile_box.position.y;
+    uint16 tile_x = tile % set.width;
+    uint16 tile_y = tile / set.width;
+    box.position.x += tile_x * (set.tile_box.dimensions.x + set.tile_box.position.x) - set.tile_box.position.x;
+    box.position.y += tile_y * (set.tile_box.dimensions.y + set.tile_box.position.y) - set.tile_box.position.y;
     box.dimensions.y -= 0.1 / (float)set.tex.height;
 
     return box;

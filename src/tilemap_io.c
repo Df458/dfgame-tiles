@@ -29,9 +29,9 @@ tilemap load_tilemap(const char* path) {
     uint16 w, h;
     tile t;
     ssize_t plen;
-    char* tileset_path;
+    char* tileset_path = NULL;
 
-    FILE* infile = fopen(path, "r");
+    FILE* infile = fopen(path, "re");
 
     check_return(infile, "Can't open tilemap file at %s", NULL, path);
     
@@ -41,27 +41,30 @@ tilemap load_tilemap(const char* path) {
         return NULL;
     }
 
-    tileset_path = mscalloc(plen + 1, char);
-    size_t read = fread(tileset_path, sizeof(char), plen, infile);
-    if(check_error(read == plen, "Can't load tilemap %s: Size mismatch in tileset path (%d != %d)", path, read, plen)) {
-        fclose(infile);
-        return NULL;
+    if(plen > 0) {
+        tileset_path = mscalloc(plen + 1, char);
+        size_t read = fread(tileset_path, sizeof(char), plen, infile);
+        if(check_error(read == plen, "Can't load tilemap %s: Size mismatch in tileset path (%d != %d)", path, read, plen)) {
+            fclose(infile);
+            return NULL;
+        }
+        tileset_path = combine_paths(get_folder(path), tileset_path, true);
     }
-    tileset_path = combine_paths(get_folder(path), tileset_path, true);
 
-    tilemap map = tilemap_new(w, h, load_tileset(tileset_path));
-    map->asset_path = nstrdup(path);
+    tilemap map = tilemap_new(w, h);
+    if(tileset_path != NULL) {
+        tilemap_set_tileset(map, load_tileset(tileset_path));
 
-    for(int i = 0; i < h; ++i) {
-        for(int j = 0; j < w; ++j) {
-            if(check_warn(fread(&t, sizeof(tile), 1, infile) == 1, "Unexpected end of file while reading tile data. Tilemap may be incomplete.")) {
-                break;
+        for(int i = 0; i < h; ++i) {
+            for(int j = 0; j < w; ++j) {
+                if(check_warn(fread(&t, sizeof(tile), 1, infile) == 1, "Unexpected end of file while reading tile data. Tilemap may be incomplete.")) {
+                    break;
+                }
+                tilemap_set_tile(map, j, i, t.id);
             }
-            tilemap_set_tile_fast(map, j, i, t.id);
         }
     }
-
-    tilemap_update_tiles(map);
+    map->asset_path = nstrdup(path);
 
     fclose(infile);
 
@@ -70,20 +73,26 @@ tilemap load_tilemap(const char* path) {
 
 // Saves a tilemap to path. tileset_file should point to the relative location for the map's tileset (this tileset file does not need to be present, and will not be accessed until the map is loaded).
 void save_tilemap(const char* path, tilemap map) {
-    FILE* outfile = fopen(path, "w");
+    FILE* outfile = fopen(path, "we");
 
     fwrite(&(map->width), sizeof(map->width), 1, outfile);
     fwrite(&(map->height), sizeof(map->height), 1, outfile);
 
-    char* t_path = get_relative_base(path, map->set.asset_path);
-    ssize_t len = strlen(map->set.asset_path) - strlen(t_path);
-    fwrite(&(len), sizeof(len), 1, outfile);
+    ssize_t len = 0;
+    if(map->set.asset_path != NULL) {
+        char* t_path = get_relative_base(path, map->set.asset_path);
+        len = strlen(map->set.asset_path) - strlen(t_path);
+        fwrite(&(len), sizeof(len), 1, outfile);
 
-    fwrite(map->set.asset_path + strlen(t_path), sizeof(char), len, outfile);
-    sfree(t_path);
+        fwrite(map->set.asset_path + strlen(t_path), sizeof(char), len, outfile);
+        sfree(t_path);
 
-    for(int i = 0; i < map->width * map->height; ++i) {
-        fwrite(map->tile_data, sizeof(tile), map->width * map->height, outfile);
+        for(int i = 0; i < map->width * map->height; ++i) {
+            fwrite(map->tile_data, sizeof(tile), map->width * map->height, outfile);
+        }
+    } else {
+        // If there's no tileset, there's nothing to write.
+        fwrite(&(len), sizeof(len), 1, outfile);
     }
 
     fclose(outfile);

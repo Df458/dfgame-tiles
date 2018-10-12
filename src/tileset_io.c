@@ -15,13 +15,14 @@
 
 // Loads a tileset from path
 tileset load_tileset(const char* path) {
+    tileset set = tileset_empty;
+
     xmlDocPtr doc = xmlReadFile(path, NULL, 0);
-    check_return(doc, "Failed to load tileset at path %s", (tileset){0}, path);
+    check_return(doc, "Failed to load tileset at path %s", set, path);
 
     xmlNodePtr root = xml_match_name(xmlDocGetRootElement(doc), "tileset");
-    check_return(root, "Tileset file %s is invalid", (tileset){0}, path);
+    check_return(root, "Tileset file %s is invalid", set, path);
 
-    tileset set = (tileset){0};
     char* file = NULL;
     check_return(xml_property_read(root, "file", &file), "Tileset at path %s does not specify a texture", set, path);
     char* full_path = combine_paths(get_folder(path), file, true);
@@ -45,7 +46,7 @@ tileset load_tileset(const char* path) {
 
     if(check_error(set.offset.x - set.tile_box.position.x + (set.tile_box.dimensions.x + set.tile_box.position.x) * set.width <= 1 || set.offset.y - set.tile_box.position.y + (set.tile_box.dimensions.y + set.tile_box.position.y) * set.height <= 1, "Dimensions of tileset %s are larger than the texture it uses", path)) {
         glDeleteTextures(1, &set.tex.handle);
-        return (tileset){0};
+        return tileset_empty;
     }
 
     int16 x = -1;

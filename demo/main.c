@@ -44,8 +44,9 @@ void randomize(action_id id, void* user) {
 
     // Fill every map space with random tile indices, calculated from the
     // tileset dimensions.
-    for(int i = 0; i < w * h; ++i)
+    for(int i = 0; i < w * h; ++i) {
         tilemap_set_tile(map, i % w, i / w, rand() % (set.width * set.height));
+    }
 }
 
 void save(action_id id, void* user) {
@@ -63,8 +64,10 @@ void load(action_id id, void* user) {
 
     // Sanity check: If the map failed to load, make a blank map to fill its place.
     // We could also keep the old map, but this method provides some sort of feedback.
-    if(!map)
-        map = tilemap_new(MAP_DIM, MAP_DIM, load_tileset(assets_path(TILESET_NAME, NULL)));
+    if(!map) {
+        map = tilemap_new(MAP_DIM, MAP_DIM);
+        tilemap_set_tileset(map, load_tileset(assets_path(TILESET_NAME, NULL)));
+    }
 }
 
 bool loop_fn(mainloop l, float dt) {
@@ -108,7 +111,8 @@ int main(int argc, char** argv) {
 
     // Create camera and map
     c_main = window_create_2d_camera(win);
-    map = tilemap_new(MAP_DIM, MAP_DIM, load_tileset(assets_path(TILESET_NAME, NULL)));
+    map = tilemap_new(MAP_DIM, MAP_DIM);
+    tilemap_set_tileset(map, load_tileset(assets_path(TILESET_NAME, NULL)));
 
     mainloop_create_run(loop_fn);
 

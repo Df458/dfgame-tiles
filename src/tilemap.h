@@ -13,7 +13,7 @@ typedef struct tile {
 } tile;
 
 // Creates a new empty tilemap
-tilemap tilemap_new(uint16 w, uint16 h, tileset set);
+tilemap tilemap_new(uint16 w, uint16 h);
 
 // Frees an existing tilemap. If deep is true, frees any associated tileset information.
 #define tilemap_free(map, deep) { _tilemap_free(map, deep); map = NULL; }
@@ -24,9 +24,6 @@ void tilemap_set_tileset(tilemap map, tileset set);
 
 // Sets the tile at [x, y]
 void tilemap_set_tile(tilemap map, uint16 x, uint16 y, uint16 id);
-
-// Sets the tile at [x, y], but doesn't update the mesh data
-void tilemap_set_tile_fast(tilemap map, uint16 x, uint16 y, uint16 id);
 
 // Regenerates the tilmap's mesh
 void tilemap_update_tiles(tilemap map);
