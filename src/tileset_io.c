@@ -16,6 +16,7 @@
 // Loads a tileset from path
 tileset load_tileset(const char* path) {
     tileset set = tileset_empty;
+    set.asset_path = nstrdup(path);
 
     xmlDocPtr doc = xmlReadFile(path, NULL, 0);
     check_return(doc, "Failed to load tileset at path %s", set, path);
@@ -44,10 +45,7 @@ tileset load_tileset(const char* path) {
     xml_property_read(root, "tile_height", &set.tile_box.dimensions.y);
     set.tile_box.dimensions.y /= (float)set.tex.height;
 
-    if(check_error(set.offset.x - set.tile_box.position.x + (set.tile_box.dimensions.x + set.tile_box.position.x) * set.width <= 1 || set.offset.y - set.tile_box.position.y + (set.tile_box.dimensions.y + set.tile_box.position.y) * set.height <= 1, "Dimensions of tileset %s are larger than the texture it uses", path)) {
-        glDeleteTextures(1, &set.tex.handle);
-        return tileset_empty;
-    }
+    check_return(set.offset.x - set.tile_box.position.x + (set.tile_box.dimensions.x + set.tile_box.position.x) * set.width <= 1 || set.offset.y - set.tile_box.position.y + (set.tile_box.dimensions.y + set.tile_box.position.y) * set.height <= 1, "Dimensions of tileset %s are larger than the texture it uses", set, path);
 
     int16 x = -1;
     int16 y = -1;
@@ -58,7 +56,6 @@ tileset load_tileset(const char* path) {
         }
     }
 
-    set.asset_path = nstrdup(path);
     xmlFreeDoc(doc);
     return set;
 }
@@ -80,10 +77,11 @@ void save_tileset(const char* path, tileset set) {
     xml_property_write(writer, "tile_width", (uint16)(set.tile_box.dimensions.x * set.tex.width));
     xml_property_write(writer, "tile_height", (uint16)(set.tile_box.dimensions.y * set.tex.height));
 
-    char* t_path = get_relative_base(path, set.tex.asset_path);
-    xml_property_write(writer, "file", set.tex.asset_path + strlen(t_path));
-    sfree(t_path);
-
+    if(set.tex.asset_path) {
+        char* t_path = get_relative_base(path, set.tex.asset_path);
+        xml_property_write(writer, "file", set.tex.asset_path + strlen(t_path));
+        sfree(t_path);
+    }
 
     if(set.tile_mask) {
         for(uint16 i = 0; i < set.width * set.height; ++i) {

@@ -8,24 +8,9 @@
 #include "core/check.h"
 #include "math/matrix.h"
 
+#include "tilemap.priv.h"
+
 static shader shader_tilemap = {0};
-
-typedef struct tilemap {
-    mesh m;
-    GLuint tile_handle;
-
-    uint16 width;
-    uint16 height;
-
-    tileset set;
-    tile* tile_data;
-
-    bool is_empty;
-    bool tiles_dirty;
-    bool mesh_dirty;
-
-    char* asset_path;
-}* tilemap;
 
 // Rebuilds the tile data buffer for map
 void tilemap_update_tiles(tilemap map) {

@@ -11,18 +11,7 @@
 
 #include <stdio.h>
 
-typedef struct tilemap {
-    mesh m;
-    GLuint tile_handle;
-
-    uint16 width;
-    uint16 height;
-
-    tileset set;
-    tile* tile_data;
-
-    char* asset_path;
-}* tilemap;
+#include "tilemap.priv.h"
 
 // Loads a tilemap from path, or returns NULL if an error occurs
 tilemap load_tilemap(const char* path) {
@@ -52,6 +41,7 @@ tilemap load_tilemap(const char* path) {
     }
 
     tilemap map = tilemap_new(w, h);
+    map->asset_path = nstrdup(path);
     if(tileset_path != NULL) {
         tilemap_set_tileset(map, load_tileset(tileset_path));
 
@@ -64,7 +54,6 @@ tilemap load_tilemap(const char* path) {
             }
         }
     }
-    map->asset_path = nstrdup(path);
 
     fclose(infile);
 
@@ -74,6 +63,8 @@ tilemap load_tilemap(const char* path) {
 // Saves a tilemap to path. tileset_file should point to the relative location for the map's tileset (this tileset file does not need to be present, and will not be accessed until the map is loaded).
 void save_tilemap(const char* path, tilemap map) {
     FILE* outfile = fopen(path, "we");
+
+    check_return(outfile != NULL, "Failed to save tilemap: Can't open file at %s", , path);
 
     fwrite(&(map->width), sizeof(map->width), 1, outfile);
     fwrite(&(map->height), sizeof(map->height), 1, outfile);
