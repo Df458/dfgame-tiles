@@ -1,8 +1,8 @@
 #ifndef DF_TILES_TILESET
 #define DF_TILES_TILESET
-#include "aabb.h"
-#include "texture.h"
-#include "types.h"
+#include "core/types.h"
+#include "graphics/texture.h"
+#include "math/aabb.h"
 
 #define NO_TILE UINT16_MAX
 

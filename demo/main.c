@@ -1,19 +1,18 @@
-#include "camera.h"
 #include "tilemap.h"
 #include "tilemap_io.h"
 #include "tileset_io.h"
 
-#include "font_loader.h"
-#include "input.h"
-#include "log/log.h"
-#include "mainloop.h"
-#include "matrix.h"
-#include "shader_init.h"
-#include "paths.h"
-#include "text.h"
-#include "transform.h"
-#include "vector.h"
-#include "window.h"
+#include "application/input.h"
+#include "application/game/mainloop.h"
+#include "application/game/window.h"
+#include "graphics/shader_init.h"
+#include "math/matrix.h"
+#include "graphics/camera.h"
+#include "graphics/text.h"
+#include "math/transform.h"
+#include "math/vector.h"
+#include "resource/font_loader.h"
+#include "resource/paths.h"
 
 #include <time.h>
 #include <stdlib.h>
@@ -106,7 +105,7 @@ int main(int argc, char** argv) {
     // Create help text
     char* p = assets_path("OpenSans-Regular.ttf", NULL);
     info_text = text_new(load_font(p, 16), info_str);
-    text_set_align(info_text, TEXT_ALIGN_BOTTOM_LEFT);
+    text_set_align(info_text, ALIGN_BOTTOM_LEFT);
     sfree(p);
 
     // Create camera and map

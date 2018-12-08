@@ -2,12 +2,12 @@
 #define LOG_CATEGORY "Tiles"
 
 #include "tilemap_io.h"
+#include "tileset_io.h"
 
 #include "core/check.h"
 #include "core/log/log.h"
 #include "core/stringutil.h"
 #include "resource/paths.h"
-#include "tileset_io.h"
 
 #include <stdio.h>
 

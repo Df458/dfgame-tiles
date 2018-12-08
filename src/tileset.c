@@ -3,7 +3,7 @@
 
 #include "tileset.h"
 
-#include "check.h"
+#include "core/check.h"
 
 const tileset tileset_empty = {{0}};
 

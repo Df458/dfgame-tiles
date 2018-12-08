@@ -1,8 +1,8 @@
 #ifndef DF_TILES_TILEMAP
 #define DF_TILES_TILEMAP
-#include "aabb.h"
-#include "mesh.h"
-#include "types.h"
+#include "core/types.h"
+#include "graphics/mesh.h"
+#include "math/aabb.h"
 
 #include "tileset.h"
 
