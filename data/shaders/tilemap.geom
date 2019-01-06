@@ -12,12 +12,10 @@ out vec2 o_uv;
 void main() {
     mat4 transform = u_transform * u_view;
     gl_Position = gl_in[0].gl_Position;
-    gl_Position.w = 1;
     o_uv = v_uv[0].xy;
     EmitVertex();
 
     gl_Position = gl_in[0].gl_Position + transform * vec4(u_dims.x, 0, 0, 0);
-    gl_Position.w = 1;
     o_uv = v_uv[0].xy + vec2(v_uv[0].z, 0);
     EmitVertex();
 
