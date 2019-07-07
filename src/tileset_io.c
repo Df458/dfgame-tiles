@@ -30,7 +30,12 @@ tileset load_tileset(const char* path) {
         return set;
     }
 
-    xml_read_tileset(root, &set, path, false);
+    const char* ext = get_extension(path);
+    if(!strcmp(ext, "tsx")) {
+        xml_read_tiled_tileset(root, &set, path, NULL);
+    } else {
+        xml_read_tileset(root, &set, path, false);
+    }
     set.asset_path = nstrdup(path);
 
     xmlFreeDoc(doc);
@@ -112,6 +117,52 @@ void xml_read_tileset(xmlNodePtr root, tileset* set, const char* path, bool part
         for(xmlNodePtr node = xml_match_name(root->children, "tile"); node; node = xml_match_name(node->next, "tile")) {
             if(xml_property_read(node, "x", &x) && xml_property_read(node, "y", &y) && xml_property_read(node, "mask", &mask)) {
                 tileset_set_mask(set, y * set->width + x, mask);
+            }
+        }
+    }
+}
+
+/** @brief Read a tileset's data from XML. This function is specifically for Tiled (.tsx) files
+ *
+ * @param root The root XML node
+ * @param set The tileset to populate
+ * @param path The filepath to use for resolving relative paths
+ * @param fn Callback for setting the tile mask. Set to NULL to leave it empty.
+ */
+void xml_read_tiled_tileset(xmlNodePtr root, tileset* set, const char* path, mask_fn fn) {
+    check_return(root, "Tileset file %s is invalid", , path);
+
+    char* file = NULL;
+    xmlNodePtr image_node = xml_match_name(root->children, "image");
+    if (image_node != NULL && xml_property_read(image_node, "source", &file)) {
+        char* full_path = combine_paths(get_folder(path), file, true);
+        set->tex = load_texture_gl(full_path);
+        sfree(full_path);
+    } else {
+        error("Tileset at path %s does not specify a texture", path);
+        return;
+    }
+
+    uint16 w, h;
+    bool has_tile_dims = xml_property_read(root, "tilewidth", &w) && xml_property_read(root, "tileheight", &h);
+    if(has_tile_dims) {
+        set->tile_box.dimensions.x = (float)w / (float)set->tex.width;
+        set->tile_box.dimensions.y = (float)h / (float)set->tex.height;
+
+        uint16 t_w, t_h;
+        if(image_node != NULL && xml_property_read(image_node, "width", &t_w) && xml_property_read(image_node, "height", &t_h)) {
+            tileset_resize(set, t_w/w, t_h/h);
+        }
+    }
+
+    if (fn != NULL) {
+        xml_foreach(tile_node, root->children, "tile") {
+            uint16 tile;
+            if (xml_property_read(tile_node, "id", &tile)) {
+                uint8 mask = fn(tile_node);
+                if (mask != 0) {
+                    tileset_set_mask(set, tile, mask);
+                }
             }
         }
     }
