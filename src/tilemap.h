@@ -25,6 +25,9 @@ void tilemap_set_tileset(tilemap map, tileset set);
 // Sets the tile at [x, y]
 void tilemap_set_tile(tilemap map, uint16 x, uint16 y, uint16 id);
 
+// Sets the tile mask at [x, y]
+void tilemap_set_tile_mask(tilemap map, uint16 x, uint16 y, uint8 mask);
+
 // Regenerates the tilmap's mesh
 void tilemap_update_tiles(tilemap map);
 

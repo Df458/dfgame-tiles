@@ -126,6 +126,13 @@ void tilemap_set_tile(tilemap map, uint16 x, uint16 y, uint16 id) {
     map->tile_data[y * map->width + x] = (tile){ .id = id, .mask = tileset_get_mask(map->set, id) };
 }
 
+// Sets the tile mask at [x, y]
+void tilemap_set_tile_mask(tilemap map, uint16 x, uint16 y, uint8 mask) {
+    check_return(x < map->width && y < map->height, "Can't set out-of-bounds tile at [%d, %d] from a %dx%d map", , x, y, map->width, map->height);
+
+    map->tile_data[y * map->width + x].mask = mask;
+}
+
 // Returns the tile value at [x, y]. Defaults to 0 and logs a warning if [x,y] is out-of-bounds.
 tile tilemap_get_tile(tilemap map, uint16 x, uint16 y) {
     check_return(x < map->width && y < map->height, "Can't get out-of-bounds tile at [%d, %d] from a %dx%d map", (tile){0}, x, y, map->width, map->height);
